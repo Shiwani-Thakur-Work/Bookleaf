@@ -1,8 +1,8 @@
 # 🍃 Bookleaf — Personal Reading Notes
 
-> A modern, Kindle-inspired digital reading journal. View your personal collection of books as sleek, closed 3D volumes on a library shelf; click any book to smoothly open it and explore reflections, Kindle-style highlights, memorable stories, and handwritten marginalia.
+> A modern, Kindle-inspired digital reading journal with authentic 3D page-flip animations, reflections, quotes, and marginalia.
 
-Designed to be **100% natively deployable on GitHub Pages** with **zero build tools, zero dependencies, and zero 3rd-party apps**.
+🔗 **Live Website**: [https://shiwani-thakur-work.github.io/Bookleaf/](https://shiwani-thakur-work.github.io/Bookleaf/)
 
 ---
 
