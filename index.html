@@ -3,80 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Reading Sanctuary — Personal Book Notes & Marginalia</title>
-  <meta name="description" content="A tactile, aesthetic digital reading journal styled like a physical hardcover book with 3D page-flip animations, quotes, stories, and personal marginalia.">
+  <title>The Reading Sanctuary — Personal Library & Notes</title>
+  <meta name="description" content="A modern, Kindle-inspired personal digital reading journal. View single book covers on the shelf, click to open and read reflections, highlights, and marginalia.">
   <meta name="author" content="Shiwani">
 
   <!-- Stylesheets (All Relative Paths for Native GitHub Pages Hosting) -->
   <link rel="stylesheet" href="./css/main.css">
-  <link rel="stylesheet" href="./css/book.css">
-  <link rel="stylesheet" href="./css/page-flip.css">
+  <link rel="stylesheet" href="./css/bookshelf.css">
+  <link rel="stylesheet" href="./css/reader.css">
 
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
 </head>
 <body>
 
-  <!-- Top Navigation Bar & Ambient Header -->
-  <header class="journal-header" id="journal-header">
-    <div class="header-brand">
-      <span class="brand-icon">❧</span>
-      <h1 class="brand-title">The Reading Sanctuary</h1>
-      <span class="brand-subtitle">Personal Notes, Quotes & Marginalia</span>
+  <!-- Modern Top Navigation Header -->
+  <header class="modern-header" id="modern-header">
+    <div class="header-left-group">
+      <button class="brand-btn" id="brand-btn" title="Back to Library Bookshelf">
+        <span class="brand-icon">📚</span>
+        <div class="brand-text-wrap">
+          <h1 class="brand-title">The Reading Sanctuary</h1>
+          <span class="brand-tagline">Personal Book Notes & Marginalia</span>
+        </div>
+      </button>
+
+      <!-- Active Reader Breadcrumb (Shown inside a book) -->
+      <nav class="reader-breadcrumb" id="reader-breadcrumb" aria-label="Breadcrumb">
+        <button class="breadcrumb-back-btn" id="breadcrumb-back-btn">
+          <span>← Bookshelf</span>
+        </button>
+        <span class="breadcrumb-book-title" id="breadcrumb-book-title"></span>
+      </nav>
     </div>
 
-    <div class="header-controls">
-      <button class="ctrl-btn" id="btn-jump-toc" title="Jump to Table of Contents">
-        <span class="icon">📜</span>
-        <span class="label">Index</span>
-      </button>
+    <!-- Right Header Action Tools -->
+    <div class="header-actions">
+      <!-- Kindle Font Size Controls (Shown inside reader) -->
+      <div class="font-size-control" id="font-size-control" title="Adjust text size">
+        <button class="font-btn" id="font-decrease-btn" title="Smaller font">A-</button>
+        <button class="font-btn" id="font-increase-btn" title="Larger font">A+</button>
+      </div>
 
-      <button class="ctrl-btn" id="btn-jump-bookmark" title="Jump to saved ribbon bookmark">
+      <!-- Jump to Bookmarks -->
+      <button class="kindle-action-btn" id="header-bookmark-btn" title="Jump to bookmarked titles">
         <span class="icon">🔖</span>
-        <span class="label">Bookmark</span>
+        <span class="label">Bookmarks</span>
       </button>
 
-      <button class="ctrl-btn" id="sound-toggle-btn" title="Toggle page-turn paper rustle sound">
+      <!-- Paper Sound Toggle -->
+      <button class="kindle-action-btn" id="sound-toggle-btn" title="Toggle soft paper turn sound">
         <span class="icon">🔊</span>
         <span class="label">Sound</span>
       </button>
 
-      <button class="ctrl-btn" id="theme-toggle-btn" title="Toggle Day Parchment / Midnight Library">
+      <!-- Kindle Reading Theme Toggle (Warm Paperwhite / Soft Dark) -->
+      <button class="kindle-action-btn" id="theme-toggle-btn" title="Toggle Warm Light / Kindle Dark">
         <span class="icon">🌙</span>
-        <span class="label">Midnight</span>
+        <span class="label">Kindle Dark</span>
       </button>
     </div>
   </header>
 
-  <!-- Ambient Desk Viewport -->
-  <main class="desk-viewport" id="desk-viewport">
-    <div id="book-container">
-      <!-- The Book Casing and Pages are injected dynamically by PageFlipEngine -->
-    </div>
+  <!-- Main Viewports -->
+  <main id="app-main">
+    <!-- View 1: The Modern Bookshelf (Single Closed Books) -->
+    <section class="shelf-view-container" id="shelf-view-container">
+      <!-- Injected by app.js -->
+    </section>
+
+    <!-- View 2: The Kindle-Inspired Open Book Reader -->
+    <section class="reader-view-container" id="reader-view-container">
+      <!-- Injected dynamically when a book is opened -->
+    </section>
   </main>
 
-  <!-- Floating Bottom Reading Dock -->
-  <nav class="reading-dock" id="reading-dock" aria-label="Book Navigation">
-    <button class="dock-nav-btn" id="btn-prev-page" title="Turn page backward (← Arrow)">
-      <span>←</span>
-      <span class="dock-label">Previous</span>
-    </button>
+  <!-- Kindle Toast Notification -->
+  <div class="kindle-toast" id="kindle-toast"></div>
 
-    <div class="spread-indicator-pill" id="spread-indicator">
-      Cover
-    </div>
-
-    <button class="dock-nav-btn" id="btn-next-page" title="Turn page forward (→ Arrow or Space)">
-      <span class="dock-label">Next</span>
-      <span>→</span>
-    </button>
-
-    <span class="keyboard-hint" title="Use Arrow keys or Spacebar to flip">[ ← / → ]</span>
-  </nav>
-
-  <!-- Scripts (All Relative Paths for Native GitHub Pages Hosting) -->
+  <!-- Client-side Scripts (Zero external build, native GitHub Pages ready) -->
   <script src="./js/audio.js"></script>
-  <script src="./js/templates.js"></script>
-  <script src="./js/page-flip-engine.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>

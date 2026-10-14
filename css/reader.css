@@ -1,0 +1,569 @@
+/* ==========================================================================
+   READER.CSS — Modern Kindle-Inspired Book Reader, Highlights & Marginalia
+   ========================================================================== */
+
+.reader-view-container {
+  display: none; /* Shown dynamically when a book is clicked */
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 24px 20px 90px 20px;
+  flex: 1;
+}
+
+.reader-view-container.active {
+  display: flex;
+  flex-direction: column;
+  animation: fadeInReader 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInReader {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==========================================================================
+   KINDLE-INSPIRED TOP SUB-BAR
+   ========================================================================== */
+.reader-subbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 4px;
+}
+
+.reader-subbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-shelf-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.subbar-btn:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+  transform: translateX(-2px);
+}
+
+.reader-subbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bookmark-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-shelf-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.bookmark-toggle-btn.bookmarked {
+  background: #9e1d1d;
+  color: #ffffff;
+  border-color: #9e1d1d;
+  box-shadow: 0 2px 8px rgba(158, 29, 29, 0.3);
+}
+
+/* ==========================================================================
+   THE MODERN OPEN BOOK SHELL
+   ========================================================================== */
+.open-book-shell {
+  position: relative;
+  width: 100%;
+  min-height: 640px;
+  background: var(--book-page-bg);
+  border-radius: 12px;
+  box-shadow: 
+    0 20px 50px var(--book-shadow),
+    0 4px 15px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px var(--border-subtle);
+  display: flex;
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  transition: background-color 0.4s ease;
+}
+
+/* Center Spine Fold Shadow */
+.open-book-shell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 32px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--book-crease) 45%,
+    rgba(0, 0, 0, 0.25) 50%,
+    var(--book-crease) 55%,
+    transparent 100%
+  );
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Dual Page Layout */
+.book-leaf {
+  flex: 1;
+  padding: 40px 44px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+  max-height: 720px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.book-leaf::-webkit-scrollbar {
+  width: 4px;
+}
+.book-leaf::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+.leaf-left {
+  border-right: 1px solid var(--border-subtle);
+  padding-right: 48px;
+}
+
+.leaf-right {
+  padding-left: 48px;
+}
+
+/* Folio Header & Footer */
+.leaf-folio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-tertiary);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 22px;
+}
+
+.leaf-folio-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-serif-reading);
+}
+
+/* ==========================================================================
+   LEFT PAGE: BOOK IDENTITY & WHAT I LIKED
+   ========================================================================== */
+.reader-book-identity {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.reader-mini-cover {
+  width: 52px;
+  height: 72px;
+  border-radius: 4px;
+  background: var(--accent-color, #2b3a4a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #fff;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
+}
+
+.reader-identity-meta {
+  flex: 1;
+}
+
+.reader-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.reader-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent-warm);
+}
+
+.reader-book-title {
+  font-family: var(--font-serif-heading);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+}
+
+.reader-author-line {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reader-stars {
+  color: #e5a93b;
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+}
+
+/* One Liner Quote Callout */
+.reader-oneliner-box {
+  background: var(--bg-surface);
+  border-left: 3px solid var(--accent-warm);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+}
+
+.reader-oneliner-text {
+  font-family: var(--font-serif-reading);
+  font-style: italic;
+  font-size: calc(var(--reader-font-size) * 0.95);
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Sections */
+.reader-section {
+  margin-bottom: 24px;
+}
+
+.reader-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reader-section-icon {
+  font-size: 0.95rem;
+  color: var(--accent-warm);
+}
+
+.reader-section-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+}
+
+.reader-reflection-body {
+  font-family: var(--font-serif-reading);
+  font-size: var(--reader-font-size);
+  line-height: var(--reader-line-height);
+  color: var(--text-secondary);
+  text-align: justify;
+}
+
+.reader-reflection-body::first-letter {
+  font-family: var(--font-serif-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
+  float: left;
+  line-height: 0.85;
+  margin-right: 8px;
+  color: var(--accent-warm);
+}
+
+/* Topics & Frameworks List */
+.reader-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reader-topic-card {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--accent-gold);
+}
+
+.reader-topic-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.reader-topic-takeaway {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   RIGHT PAGE: KINDLE HIGHLIGHTS, STORIES & MARGINALIA
+   ========================================================================== */
+.kindle-highlights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.kindle-highlight-card {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--border-subtle);
+  transition: var(--transition-smooth);
+}
+
+.kindle-highlight-card:hover {
+  border-color: var(--border-strong);
+}
+
+.kindle-highlight-text {
+  font-family: var(--font-serif-reading);
+  font-size: calc(var(--reader-font-size) * 0.94);
+  line-height: 1.55;
+  color: var(--text-primary);
+  /* Kindle style warm yellow highlight effect */
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 20%,
+    var(--highlight-amber) 20%,
+    var(--highlight-amber) 100%
+  );
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.kindle-highlight-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.kindle-loc {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.kindle-note {
+  font-style: italic;
+  color: var(--accent-warm);
+}
+
+/* Stories Box */
+.reader-story-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.reader-story-title {
+  font-family: var(--font-serif-heading);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.reader-story-summary {
+  font-family: var(--font-serif-reading);
+  font-size: calc(var(--reader-font-size) * 0.9);
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* Modern Post-It Marginalia Note */
+.modern-marginalia-card {
+  position: relative;
+  background: var(--postit-bg);
+  color: var(--postit-text);
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 6px 18px var(--postit-shadow);
+  border: 1px solid var(--border-subtle);
+  margin-top: 14px;
+  transform: rotate(-0.8deg);
+  transition: transform 0.2s ease;
+}
+
+.modern-marginalia-card:hover {
+  transform: rotate(0deg) scale(1.01);
+}
+
+.marginalia-pin-badge {
+  position: absolute;
+  top: -8px;
+  left: 20px;
+  font-size: 1rem;
+}
+
+.marginalia-handwritten-note {
+  font-family: var(--font-hand);
+  font-size: 1.25rem;
+  line-height: 1.35;
+  color: var(--postit-text);
+}
+
+.marginalia-footer {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-top: 6px;
+}
+
+/* ==========================================================================
+   KINDLE-INSPIRED READING PROGRESS BAR
+   ========================================================================== */
+.reader-progress-bar-wrap {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-shelf-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 10px 24px;
+}
+
+.progress-left-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.progress-line-track {
+  width: 120px;
+  height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-line-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--accent-warm);
+}
+
+.progress-nav-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-jump-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.progress-jump-btn:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS (< 900px)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .open-book-shell {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .open-book-shell::before {
+    display: none; /* No spine fold in mobile stacked view */
+  }
+
+  .book-leaf {
+    max-height: none;
+    padding: 28px 20px;
+  }
+
+  .leaf-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-right: 20px;
+  }
+
+  .leaf-right {
+    padding-left: 20px;
+  }
+
+  .reader-progress-bar-wrap {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .progress-nav-buttons {
+    justify-content: space-between;
+  }
+}

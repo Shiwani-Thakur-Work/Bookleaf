@@ -5,33 +5,26 @@
 
 ---
 
-## 🎯 Architecture & Technical Guidelines
+## 🎯 Architecture & Visual Direction
 
-### 1. Technology: Pure Vanilla Web Stack (HTML5 + CSS3 + Modern JavaScript)
-- **Zero Build Step**: No Node.js compilation, npm build, or bundlers required.
-- **Direct GitHub Pages Hosting**:
-  - `index.html` sits at the repository root.
-  - All assets, scripts, data, and styles use **strict relative paths** (`./css/`, `./js/`, `./data/`) so it works out-of-the-box whether hosted at root domain or a GitHub project subpath (`username.github.io/ReadingNotes/`).
-- **Data Persistence & Updates**:
-  - All book notes, reflections, quotes, and marginalia are stored in a clean, human-editable `./data/books.json` file.
-  - Adding a book takes under 2 minutes by adding a JSON record and committing to GitHub.
-- **Local Progress**:
-  - Last read page and theme preferences are saved in `localStorage`.
-
-### 2. Physical Book Aesthetics & Page-Flip Engine
-- **Visuals**:
-  - Luxurious vintage hardcover casing with leather/cloth grain and embossed gold typography.
-  - Center spine gutter with realistic lighting/crease depth shadow.
-  - Creamy parchment paper pages (`#FAF7F0`) with subtle paper grain and deckle edges.
-  - Hanging silk crimson bookmark ribbon (`#8B1E1E`) with gold fringe.
-  - Authentic typography: *Cinzel* & *Playfair Display* (vintage titles), *Lora* (editorial body text), and *Caveat* (handwritten marginalia).
-- **Interactive 3D Page Flip**:
-  - Dual-page spread on desktop (Left + Right page).
-  - 3D CSS perspective transforms with dynamic cast shadows during turns.
-  - Interactive corner-peel hover hint (invites users to turn pages).
-  - Flexible navigation: Arrow keys (`←` / `→`), clickable page edges, next/prev buttons, and mobile touch swipe.
-  - Responsive single-page notebook mode on mobile and tablets.
-  - Optional paper rustle sound effect generated natively with Web Audio API (zero audio files needed, zero external dependencies).
+### 1. Modern Bookshelf & Single-Book Reader
+- **Bookshelf View ("Single Look Not Open")**:
+  - Each book is presented as a sleek, standalone 3D closed book cover.
+  - Features cloth/matte textured covers, spine edge lighting, custom symbols, title, author, star rating, and a sneak-peek one-liner.
+  - Hovering lifts the book with a soft ambient shadow.
+  - Clicking any book smoothly transitions into the **Book Reader View** for that specific book.
+  - Search bar and genre filter chips (#Habits, #Philosophy, #Finance, #Fiction) filter the shelf in real-time.
+- **Kindle-Inspired Reading View ("Open Book Experience")**:
+  - Dual-page spread layout with center gutter shadow on desktop; responsive single-page layout on mobile.
+  - **Left Page**: Book identity, tags, reading date, star rating, "The Core Spark" (What I Liked), and Core Concepts.
+  - **Right Page**: Kindle-style Standout Highlights (with warm amber highlight underlines and Location / Page references), Stories & Parables, and handwritten-style Marginalia post-its.
+  - **Kindle Reading Controls**:
+    - **Font Size Adjuster (`A-` / `A+`)**: Scalable reading typography saved in `localStorage`.
+    - **Reading Palette**:
+      - *Warm Light / Paperwhite*: Low eye strain warm beige cream (`#F4EFE6`), calm charcoal ink (`#242220`).
+      - *Kindle Dark*: Soft slate charcoal (`#18191C`) with gentle silver text (`#E4E6EB`), avoiding harsh pitch-black contrast.
+    - **Reading Progress Bar**: Kindle-style progress indicator (`Book X of Y • % of Library`) with `← Previous Book` and `Next Book →` buttons.
+    - **Bookmarks**: Bookmark toggle on any book with quick jump from the top header.
 
 ---
 
@@ -39,46 +32,41 @@
 
 ```
 ReadingNotes/
-├── index.html                  # Main journal viewer (GitHub Pages entrypoint)
+├── index.html                  # Main viewer shell (GitHub Pages entrypoint)
+├── README.md                   # Quickstart, deployment guide & guide to adding books
 ├── doc/                        # Documentation directory
 │   ├── context.md              # Conceptual architecture & vision
 │   └── implementation_plan.md  # Step-by-step roadmap
 ├── css/
-│   ├── main.css                # Base reset, desk surface, controls, themes
-│   ├── book.css                # Hardcover casing, spine fold, parchment, typography, layout
-│   └── page-flip.css           # 3D transforms, page curl, flip animations & lighting
+│   ├── main.css                # Kindle-inspired palettes, header, tokens & typography
+│   ├── bookshelf.css           # 3D single closed book cards, hero stats, search & tags
+│   └── reader.css              # Kindle highlights, open book shell, progress bar, marginalia
 ├── js/
 │   ├── audio.js                # Synthesized paper rustle using Web Audio API
-│   ├── page-flip-engine.js     # Spread management, 3D flip mechanics, gestures & keyboard
-│   ├── templates.js            # Modular page renderers (Cover, Index, Spreads, Back)
-│   └── app.js                  # Data loading, search/filter, bookmarking, init
-├── data/
-│   └── books.json              # Data store for books, reflections, quotes, stories & marginalia
-└── assets/
-    └── icons/                  # Subtle SVGs (feather quill, bookmark, search)
+│   └── app.js                  # Bookshelf & reader controller, Kindle font scaling, filters
+└── data/
+    └── books.json              # Clean data store for books, reflections, quotes & marginalia
 ```
 
 ---
 
-## 📋 Implementation Checklist
+## 📋 Implementation Status
 
-### Phase 1: Directory Setup & Data Schema
-- [x] Create `doc/` folder and move documentation.
-- [ ] Create folder structure (`css/`, `js/`, `data/`, `assets/`).
-- [ ] Craft `data/books.json` with rich, diverse sample book records (*Atomic Habits*, *Meditations*, *The Psychology of Money*, *Klara and the Sun*).
-
-### Phase 2: Design Tokens & Physical Book Styling
-- [ ] `css/main.css`: Ambient desk lighting, dark wood texture, header ribbon, floating toolbar.
-- [ ] `css/book.css`: Hardcover binding, spine crease shadow, paper grain, vintage serif typography (*Cinzel*, *Lora*, *Caveat*), blockquotes, post-it notes.
-- [ ] `css/page-flip.css`: 3D perspective, page rotation keyframes, dynamic shadow overlays, corner curling.
-
-### Phase 3: JavaScript Core & Page Flip Engine
-- [ ] `js/audio.js`: Native Web Audio paper rustle generator.
-- [ ] `js/page-flip-engine.js`: Dual-page spread state machine, 3D flip animation orchestrator, keyboard & touch handlers.
-- [ ] `js/templates.js`: HTML templates for Book Cover, Table of Contents, Reading Spreads (Left + Right), and Back Matter.
-- [ ] `js/app.js`: Data fetching, live search & tag filtering, ribbon bookmark memory (`localStorage`), theme toggling.
-
-### Phase 4: Main Entry Point & GitHub Pages Validation
-- [ ] `index.html`: Fully relative paths, semantic HTML5, accessible controls, responsive viewport.
-- [ ] In-browser verification with full visual and interaction testing.
-- [ ] Document quick instructions for pushing to GitHub and turning on GitHub Pages.
+- [x] **Phase 1: Project Scaffolding & Git Init**
+  - Git initialized with `main` branch.
+  - Pure static HTML/CSS/JS with strict relative paths (`./css/`, `./js/`, `./data/`).
+- [x] **Phase 2: Modern 3D Closed Book Shelf**
+  - Standalone 3D book covers with spine shadows and hover elevations.
+  - Real-time search and genre tag filters.
+  - Quick library statistics (volumes, highlights, stories).
+- [x] **Phase 3: Kindle-Inspired Open Book Reader**
+  - Click-to-open book transition.
+  - Dual-leaf spread layout on desktop, stacked on mobile.
+  - Kindle quote highlights with amber highlight underlines and Location references.
+  - Stories and handwritten marginalia cards.
+- [x] **Phase 4: Kindle Reading Tools**
+  - `A-` / `A+` font size controls.
+  - Warm Paperwhite vs Kindle Soft Dark mode.
+  - Reading progress bar and fast next/previous book jumps.
+  - Bookmark persistence via `localStorage`.
+  - Paper rustle sound effects via Web Audio API.

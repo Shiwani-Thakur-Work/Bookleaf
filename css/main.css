@@ -1,69 +1,98 @@
 /* ==========================================================================
-   MAIN.CSS — Desk Environment, Design Tokens, Navigation Bar & Toolbar
+   MAIN.CSS — Modern Literary Design Tokens, Kindle-Inspired Palettes & Layout
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Cinzel:wght@500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Day Theme (Warm Parchment & Mahogany Desk) */
-  --bg-desk: #18120c radial-gradient(circle at 50% 30%, #2b1f16 0%, #150f0b 70%, #0d0907 100%);
-  --desk-wood-grain: radial-gradient(ellipse at 50% 50%, rgba(212, 163, 115, 0.04) 0%, rgba(0,0,0,0.4) 100%);
+  /* ========================================================================
+     KINDLE-INSPIRED COLOR PALETTES
+     Tuned specifically for calm, strain-free reading (not too bright / not too dark)
+     ======================================================================== */
   
-  --cover-bg: #2b1d14;
-  --cover-border: #875c36;
-  --cover-gold: #d4af37;
-  --cover-gold-glow: rgba(212, 175, 55, 0.25);
-  
-  --paper-bg: #faf6ee;
-  --paper-grain: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(0,0,0,0.02) 100%);
-  --paper-edge: #e6dfce;
-  --paper-shadow: rgba(26, 18, 11, 0.35);
-  
-  --ink-primary: #231f1d;
-  --ink-secondary: #5a524c;
-  --ink-muted: #8c827a;
-  --ink-accent: #8b2518;
-  
-  --postit-bg: #fcf4cf;
-  --postit-ink: #1c1917;
-  --postit-shadow: rgba(0, 0, 0, 0.12);
-  
-  --ribbon-color: #9e1d1d;
-  --ribbon-fringe: #d4af37;
-  
-  --toolbar-bg: rgba(26, 19, 13, 0.88);
-  --toolbar-border: rgba(212, 175, 55, 0.25);
-  --toolbar-text: #e6dfce;
-  --toolbar-btn-hover: rgba(212, 175, 55, 0.15);
+  /* Theme: Warm Paperwhite (Kindle Warm Light) */
+  --bg-app: #f4efe6;
+  --bg-surface: #eae3d5;
+  --bg-shelf-card: #f9f6f0;
+  --border-subtle: rgba(70, 55, 40, 0.12);
+  --border-strong: rgba(70, 55, 40, 0.22);
 
-  --font-serif-title: 'Cinzel', 'Playfair Display', Georgia, serif;
-  --font-serif-sub: 'Playfair Display', Georgia, serif;
-  --font-body: 'Lora', Georgia, 'Times New Roman', serif;
+  --book-page-bg: #faf7f2;
+  --book-page-edge: #eee7da;
+  --book-crease: rgba(45, 30, 15, 0.12);
+  --book-shadow: rgba(40, 28, 18, 0.22);
+
+  --text-primary: #242220;      /* Soft charcoal ink, never harsh 100% black */
+  --text-secondary: #5e5750;    /* Muted reader grey */
+  --text-tertiary: #8f857b;     /* Footnotes & metadata */
+  --accent-warm: #a64d26;       /* Terracotta warm accent */
+  --accent-gold: #c28e3b;       /* Soft amber highlight */
+
+  /* Kindle Quote Highlighting Colors */
+  --highlight-amber: rgba(245, 180, 50, 0.28);
+  --highlight-green: rgba(100, 185, 120, 0.24);
+  --highlight-blue: rgba(80, 160, 225, 0.22);
+  --highlight-pink: rgba(235, 115, 140, 0.22);
+
+  --postit-bg: #fbf5d6;
+  --postit-text: #2a261f;
+  --postit-shadow: rgba(50, 40, 25, 0.15);
+
+  --toolbar-bg: rgba(244, 239, 230, 0.92);
+  --toolbar-border: rgba(70, 55, 40, 0.14);
+  --toolbar-text: #2c2724;
+
+  /* Typography */
+  --font-serif-reading: 'Newsreader', 'Lora', Georgia, serif;
+  --font-serif-heading: 'Lora', Georgia, serif;
+  --font-ui: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-hand: 'Caveat', cursive, sans-serif;
+
+  /* Kindle Font Scale (Adjustable) */
+  --reader-font-size: 1.05rem;
+  --reader-line-height: 1.7;
+
+  --transition-smooth: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-[data-theme="midnight"] {
-  /* Midnight Library Theme (Candlelit Deep Indigo/Navy & Charcoal) */
-  --bg-desk: #0a0c12 radial-gradient(circle at 50% 30%, #151a26 0%, #090b10 70%, #040507 100%);
-  --cover-bg: #141a24;
-  --cover-border: #41556e;
-  --cover-gold: #e2b963;
-  --cover-gold-glow: rgba(226, 185, 99, 0.3);
-  
-  --paper-bg: #f4eee2;
-  --paper-edge: #dfd7c7;
-  --paper-shadow: rgba(3, 5, 8, 0.65);
-  
-  --ink-primary: #1e1b18;
-  --ink-secondary: #4f4740;
-  --ink-accent: #782015;
+/* ==========================================================================
+   KINDLE SOFT DARK THEME
+   Soft slate charcoal (Kindle Dark Mode), prevents eye fatigue without stark contrast
+   ========================================================================== */
+[data-theme="dark"] {
+  --bg-app: #18191c;
+  --bg-surface: #202227;
+  --bg-shelf-card: #252830;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
 
-  --toolbar-bg: rgba(13, 16, 24, 0.92);
-  --toolbar-border: rgba(226, 185, 99, 0.3);
-  --toolbar-text: #ece5d8;
-  --toolbar-btn-hover: rgba(226, 185, 99, 0.18);
+  --book-page-bg: #21242b;
+  --book-page-edge: #191b20;
+  --book-crease: rgba(0, 0, 0, 0.45);
+  --book-shadow: rgba(0, 0, 0, 0.65);
+
+  --text-primary: #e4e6eb;      /* Soft off-white */
+  --text-secondary: #9da2af;    /* Calm silver-grey */
+  --text-tertiary: #6e7382;
+  --accent-warm: #e07a5f;
+  --accent-gold: #d8a855;
+
+  --highlight-amber: rgba(216, 168, 85, 0.32);
+  --highlight-green: rgba(80, 165, 110, 0.28);
+  --highlight-blue: rgba(90, 155, 215, 0.26);
+
+  --postit-bg: #2d303a;
+  --postit-text: #e8eaf0;
+  --postit-shadow: rgba(0, 0, 0, 0.4);
+
+  --toolbar-bg: rgba(24, 25, 28, 0.94);
+  --toolbar-border: rgba(255, 255, 255, 0.1);
+  --toolbar-text: #e4e6eb;
 }
 
+/* ==========================================================================
+   GLOBAL RESET & BASE
+   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -71,254 +100,202 @@
 }
 
 body {
-  font-family: var(--font-body);
-  background: var(--bg-desk);
-  background-attachment: fixed;
-  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
-  user-select: none;
+  transition: background-color 0.4s ease, color 0.4s ease;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Desk Ambient Lighting Glow */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 50% 25%, rgba(255, 230, 180, 0.08) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 1;
-}
-
 /* ==========================================================================
-   TOP BAR / NAVIGATION HEADER
+   MODERN APP HEADER & NAVIGATION
    ========================================================================== */
-.journal-header {
-  position: relative;
-  z-index: 10;
+.modern-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 28px;
+  padding: 14px 32px;
   background: var(--toolbar-bg);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--toolbar-border);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: var(--transition-smooth);
 }
 
-.header-brand {
+.header-left-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
+}
+
+.brand-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 .brand-icon {
-  font-size: 1.4rem;
-  color: var(--cover-gold);
-  filter: drop-shadow(0 0 6px var(--cover-gold-glow));
+  font-size: 1.35rem;
+}
+
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-title {
-  font-family: var(--font-serif-title);
+  font-family: var(--font-serif-heading);
   font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 2px;
-  color: var(--toolbar-text);
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
 }
 
-.brand-subtitle {
-  font-family: var(--font-body);
+.brand-tagline {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Breadcrumb Navigation when inside a book */
+.reader-breadcrumb {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border-strong);
+}
+
+.breadcrumb-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 5px 12px;
   font-size: 0.78rem;
-  font-style: italic;
-  color: var(--cover-gold);
-  margin-left: 8px;
-  opacity: 0.85;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
 }
 
-.header-controls {
+.breadcrumb-back-btn:hover {
+  background: var(--bg-surface);
+  transform: translateX(-2px);
+}
+
+.breadcrumb-book-title {
+  font-family: var(--font-serif-heading);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+/* Header Right Action Toolbar */
+.header-actions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.ctrl-btn {
+.kindle-action-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
   background: transparent;
-  border: 1px solid var(--toolbar-border);
-  border-radius: 4px;
-  color: var(--toolbar-text);
-  font-family: var(--font-serif-title);
-  font-size: 0.76rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.ctrl-btn:hover {
-  background: var(--toolbar-btn-hover);
-  border-color: var(--cover-gold);
-  color: var(--cover-gold);
-  box-shadow: 0 0 10px var(--cover-gold-glow);
-  transform: translateY(-1px);
-}
-
-.ctrl-btn:active {
-  transform: translateY(0);
-}
-
-/* ==========================================================================
-   DESK WORKSPACE & BOOK CONTAINER
-   ========================================================================== */
-.desk-viewport {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 20px 80px 20px;
-  perspective: 2400px;
-}
-
-#book-container {
-  position: relative;
-  width: 100%;
-  max-width: 1180px;
-  height: 720px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-/* ==========================================================================
-   FLOATING BOTTOM READING TOOLBAR
-   ========================================================================== */
-.reading-dock {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 24px;
-  background: var(--toolbar-bg);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--toolbar-border);
-  border-radius: 30px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-.dock-nav-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid var(--toolbar-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
-  color: var(--toolbar-text);
-  font-family: var(--font-serif-title);
+  padding: 7px 14px;
   font-size: 0.8rem;
-  letter-spacing: 1.2px;
+  font-weight: 600;
+  color: var(--text-primary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--transition-smooth);
 }
 
-.dock-nav-btn:hover:not(:disabled) {
-  background: var(--cover-gold);
-  color: #1a120b;
-  border-color: var(--cover-gold);
-  box-shadow: 0 0 12px var(--cover-gold-glow);
+.kindle-action-btn:hover {
+  background: var(--bg-surface);
+  border-color: var(--border-strong);
   transform: translateY(-1px);
 }
 
-.dock-nav-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  border-color: transparent;
-}
-
-.spread-indicator-pill {
-  display: flex;
+.font-size-control {
+  display: none; /* Shown only inside reader view */
   align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 14px;
-  font-family: var(--font-serif-sub);
-  font-size: 0.82rem;
-  font-style: italic;
-  color: var(--cover-gold);
-  border: 1px solid rgba(212, 175, 55, 0.15);
-  white-space: nowrap;
-}
-
-.keyboard-hint {
-  font-size: 0.7rem;
-  color: var(--ink-muted);
-  font-family: monospace;
-  opacity: 0.8;
-}
-
-/* ==========================================================================
-   TOAST NOTIFICATIONS
-   ========================================================================== */
-.journal-toast {
-  position: fixed;
-  top: 75px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-20px);
-  background: var(--toolbar-bg);
-  color: var(--cover-gold);
-  border: 1px solid var(--cover-gold);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 16px var(--cover-gold-glow);
-  padding: 10px 22px;
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
-  font-family: var(--font-serif-title);
+  padding: 2px 4px;
+  background: var(--bg-surface);
+}
+
+.font-btn {
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 14px;
+  transition: var(--transition-smooth);
+}
+
+.font-btn:hover {
+  background: var(--bg-shelf-card);
+}
+
+/* Toast Notice */
+.kindle-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  background: var(--text-primary);
+  color: var(--bg-app);
+  padding: 9px 20px;
+  border-radius: 24px;
   font-size: 0.82rem;
-  letter-spacing: 1px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 9999;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1000;
   pointer-events: none;
 }
 
-.journal-toast.visible {
+.kindle-toast.visible {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
 }
 
-/* ==========================================================================
-   RESPONSIVE DESIGN
-   ========================================================================== */
-@media (max-width: 900px) {
-  .brand-subtitle, .keyboard-hint {
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modern-header {
+    padding: 12px 18px;
+  }
+  .brand-tagline {
     display: none;
   }
-  .journal-header {
-    padding: 10px 16px;
-  }
-  .desk-viewport {
-    padding: 15px 10px 85px 10px;
-  }
-  #book-container {
-    height: auto;
-    min-height: 640px;
+  .breadcrumb-book-title {
+    max-width: 140px;
   }
 }

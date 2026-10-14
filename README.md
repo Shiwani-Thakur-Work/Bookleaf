@@ -1,6 +1,6 @@
-# 📖 The Reading Sanctuary — Digital Reading Journal
+# 📖 The Reading Sanctuary — Personal Library & Notes
 
-> A tactile, aesthetic digital reading journal styled like a physical hardcover book with 3D page-flip animations, paper textures, quotes, stories, and personal marginalia.
+> A modern, Kindle-inspired digital reading sanctuary. View your personal collection of books as sleek, closed 3D volumes on a library shelf; click any book to smoothly open it and explore reflections, Kindle-style highlights, memorable stories, and handwritten marginalia.
 
 Designed to be **100% natively deployable on GitHub Pages** with **zero build tools, zero dependencies, and zero 3rd-party apps**.
 
@@ -8,65 +8,54 @@ Designed to be **100% natively deployable on GitHub Pages** with **zero build to
 
 ## ✨ Features
 
-- **Tactile Physical Book Interface**:
-  - Realistic leather/cloth hardcover casing with gold-foil embossing and edge stitching.
-  - Concave center spine crease with realistic fold shadows.
-  - Creamy ivory parchment pages with paper grain and subtle inner-depth shadows.
-  - Authentic red silk ribbon bookmark with page-memory persistence.
-  - Distinctive typography using *Cinzel*, *Playfair Display*, *Lora*, and *Caveat* (handwritten marginalia).
-- **Smooth 3D Page Flip Mechanics**:
-  - Dual-page spread on desktop with dynamic lighting gradients during page turns.
-  - Interactive corner-curl hover effects that invite turning.
-  - Navigate with keyboard arrows (`←` / `→`), spacebar, bottom dock buttons, or clickable page edges.
-  - Responsive single-page notebook view with touch swipe support on mobile and tablets.
-- **Rich Content Schema**:
-  - **What I Liked / The Core Spark**: High-level takeaways and personal reflections.
-  - **Standout Passages & Quotes**: Styled blockquotes with page citations and commentary.
-  - **Stories & Parables**: Anecdotes, case studies, and allegories from the book.
-  - **Themes & Mental Models**: Core frameworks.
-  - **Personal Marginalia**: Post-it notes with handwritten notes, timestamps, and stickers.
-- **Interactive Features**:
-  - **Table of Contents (Index)**: Click to jump directly to any book.
-  - **Search & Tag Filter**: Real-time search by title, author, or tag (#Stoicism, #Habits, #Finance, #Fiction).
-  - **Ribbon Bookmark**: Click the red hanging ribbon on any page to remember your spot. Automatically restores on revisit.
-  - **Theme Toggle**: Switch between *Warm Parchment* (Day desk) and *Midnight Library* (Dark candlelit mode).
-  - **Page Turn Rustle Audio**: Synthesized paper rustle using Web Audio API (zero audio file downloads, mute toggle included).
+- **Modern Personal Bookshelf ("Single Look Not Open")**:
+  - Each book appears as a standalone 3D closed volume with cloth/matte textured cover jackets, spine shadows, and embossed symbols.
+  - Hover elevation with soft ambient shadows.
+  - Real-time search by title, author, key idea, or quote.
+  - Genre filter chips (#Habits, #Philosophy, #Finance, #Fiction).
+  - Quick library stats: Total volumes, highlights, and stories.
+- **Kindle-Inspired Reading Experience ("Open Book View")**:
+  - Clicking any book smoothly opens its personal journal.
+  - **Left Page**: Book identity, tags, reading date, star rating, one-liner callout, "The Core Spark" (What I Liked), and Core Concepts.
+  - **Right Page**:
+    - **Standout Highlights & Quotes**: Kindle-style amber highlight underlines with Location citations (`Loc 412`) and reflection notes.
+    - **Stories & Parables**: Memorable anecdotes from the book.
+    - **Handwritten Marginalia**: Sticky note with personalized observations.
+- **Kindle Reading Tools**:
+  - **Font Size Adjuster (`A-` / `A+`)**: Increase or decrease reading text size on the fly (saved to `localStorage`).
+  - **Calibrated Reading Themes**:
+    - **Warm Light / Paperwhite**: Gentle cream-beige background (`#F4EFE6`) with soft charcoal ink (`#242220`) for fatigue-free daylight reading.
+    - **Kindle Dark**: Soft slate charcoal (`#18191C`) with gentle silver text (`#E4E6EB`) — no harsh pitch-black contrast.
+  - **Reading Progress Bar**: Kindle-style progress tracker with `← Previous Book` and `Next Book →` buttons.
+  - **Bookmarks**: Bookmark any title with 1-click header access to your saved books.
+  - **Tactile Paper Sound**: Synthesized soft paper rustle on book open / turns via Web Audio API (mute toggle included).
 
 ---
 
 ## 🚀 How to Deploy Directly to GitHub Pages (2 Minutes)
 
-This project has **no build steps** and requires **no 3rd-party services**. It deploys straight from GitHub:
-
-1. **Push this folder to a new GitHub repository**:
+1. **Commit and push to GitHub**:
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit: The Reading Sanctuary"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/ReadingNotes.git
+   git commit -m "Update: Modern bookshelf view and Kindle-inspired reader"
    git push -u origin main
    ```
 
-2. **Turn on GitHub Pages**:
-   - In your GitHub repository, click **Settings** (top menu).
-   - In the left sidebar, click **Pages**.
-   - Under **Build and deployment** > **Branch**:
-     - Select `main` branch.
-     - Folder: leave as `/ (root)`.
-     - Click **Save**.
+2. **Enable GitHub Pages**:
+   - In your GitHub repo, go to **Settings** → **Pages**.
+   - Under **Build and deployment** > **Branch**: select `main` and `/ (root)`.
+   - Click **Save**.
 
-3. **Done!**
-   - In 30 to 60 seconds, your site will be live at:
-     ```
-     https://<your-username>.github.io/ReadingNotes/
-     ```
+3. **Live within 60 seconds** at:
+   ```
+   https://<your-username>.github.io/ReadingNotes/
+   ```
 
 ---
 
 ## ✍️ How to Add a New Book
 
-To add your own reading notes, simply open [`data/books.json`](./data/books.json) and append a new record:
+Open [`data/books.json`](./data/books.json) and add a new entry:
 
 ```json
 {
@@ -79,19 +68,20 @@ To add your own reading notes, simply open [`data/books.json`](./data/books.json
   "dateRead": "October 2026",
   "accentColor": "#8A3B22",
   "coverSymbol": "🧠",
-  "oneLiner": "The ability to perform deep work is becoming increasingly rare at exactly the same time it is becoming increasingly valuable in our economy.",
+  "oneLiner": "The ability to perform deep work is becoming increasingly rare at the same time it is becoming increasingly valuable.",
   "whatILiked": "The clear distinction between shallow busywork and deep cognitively demanding focus...",
   "quotes": [
     {
       "text": "Clarity about what matters provides clarity about what does not.",
       "page": "47",
+      "loc": "Loc 490",
       "note": "Ruthless prioritization."
     }
   ],
   "stories": [
     {
       "title": "Carl Jung's Bollingen Tower",
-      "summary": "How Carl Jung built a private stone tower in the woods without electricity to write in solitude."
+      "summary": "How Carl Jung built a private stone retreat without electricity to write in solitude."
     }
   ],
   "topics": [
@@ -108,19 +98,13 @@ To add your own reading notes, simply open [`data/books.json`](./data/books.json
 }
 ```
 
-Commit the change to GitHub, and your reading journal updates automatically!
+Commit to GitHub, and your new book will immediately appear on the shelf!
 
 ---
 
 ## 💻 Local Preview
-
-You can preview the site locally using any simple web server:
-
-- **Using Python**:
-  ```bash
-  python -m http.server 8080
-  ```
-  Then open `http://localhost:8080` in your browser.
-
-- **Using VS Code Live Server**:
-  Right-click `index.html` and select **"Open with Live Server"**.
+Run the local server:
+```bash
+node server.js
+```
+Open **`http://localhost:4321/`** in your browser.
