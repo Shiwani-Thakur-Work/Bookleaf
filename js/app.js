@@ -1,9 +1,8 @@
 /**
- * Main Application Controller for The Reading Sanctuary
- * Modern Kindle-inspired Personal Bookshelf & Interactive Book Reader
+ * The Reading Sanctuary — Main Controller
+ * Modern 3D Standalone Bookshelf + Authentic 3D Page Flip Book Reader
  */
 
-// Offline & direct file:// fallback data
 const DEFAULT_BOOKS = [
   {
     "id": "atomic-habits",
@@ -217,27 +216,34 @@ const DEFAULT_BOOKS = [
   }
 ];
 
-class ReadingSanctuaryApp {
+class SanctuaryApp {
   constructor() {
     this.books = [];
     this.currentView = 'shelf'; // 'shelf' | 'reader'
     this.currentBookId = null;
     this.activeTag = 'All';
     this.searchQuery = '';
-    this.theme = localStorage.getItem('reading_sanctuary_theme') || 'parchment';
-    this.fontSizeIndex = parseInt(localStorage.getItem('reading_sanctuary_font_idx') || '1', 10);
+    
+    // Page Flip State for Active Book
+    this.currentSpread = 0;
+    this.bookSpreads = [];
+    this.isPageTurning = false;
+
+    // Theme & Preferences
+    this.theme = localStorage.getItem('sanctuary_theme') || 'parchment';
+    this.fontSizeIdx = parseInt(localStorage.getItem('sanctuary_font_idx') || '1', 10);
     this.fontSizes = ['0.95rem', '1.05rem', '1.18rem'];
-    this.bookmarks = JSON.parse(localStorage.getItem('reading_sanctuary_bookmarks') || '[]');
+    this.bookmarks = JSON.parse(localStorage.getItem('sanctuary_bookmarks') || '[]');
   }
 
   async init() {
     this.applyTheme(this.theme);
-    this.applyFontSize(this.fontSizeIndex);
+    this.applyFontSize(this.fontSizeIdx);
     await this.loadBooks();
     this.setupGlobalEvents();
     this.renderShelf();
 
-    // Check if URL has a book anchor (e.g. #atomic-habits)
+    // Check URL anchor (e.g. #atomic-habits)
     const hash = window.location.hash.replace('#', '');
     if (hash && this.books.some(b => b.id === hash)) {
       this.openBook(hash);
@@ -259,7 +265,7 @@ class ReadingSanctuaryApp {
 
   applyTheme(theme) {
     this.theme = theme;
-    localStorage.setItem('reading_sanctuary_theme', theme);
+    localStorage.setItem('sanctuary_theme', theme);
     document.documentElement.setAttribute('data-theme', theme);
     const themeBtn = document.getElementById('theme-toggle-btn');
     if (themeBtn) {
@@ -270,44 +276,26 @@ class ReadingSanctuaryApp {
   }
 
   applyFontSize(idx) {
-    this.fontSizeIndex = Math.max(0, Math.min(idx, this.fontSizes.length - 1));
-    localStorage.setItem('reading_sanctuary_font_idx', this.fontSizeIndex.toString());
-    document.documentElement.style.setProperty('--reader-font-size', this.fontSizes[this.fontSizeIndex]);
+    this.fontSizeIdx = Math.max(0, Math.min(idx, this.fontSizes.length - 1));
+    localStorage.setItem('sanctuary_font_idx', this.fontSizeIdx.toString());
+    document.documentElement.style.setProperty('--reader-font-size', this.fontSizes[this.fontSizeIdx]);
   }
 
   setupGlobalEvents() {
-    // Brand button returns to bookshelf
-    const brandBtn = document.getElementById('brand-btn');
-    if (brandBtn) {
-      brandBtn.addEventListener('click', () => this.showShelf());
-    }
+    // Header brand button -> Shelf
+    document.getElementById('brand-btn')?.addEventListener('click', () => this.showShelf());
+    document.getElementById('breadcrumb-back-btn')?.addEventListener('click', () => this.showShelf());
 
-    // Breadcrumb back button
-    const backBtn = document.getElementById('breadcrumb-back-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', () => this.showShelf());
-    }
+    // Theme toggle
+    document.getElementById('theme-toggle-btn')?.addEventListener('click', () => {
+      this.applyTheme(this.theme === 'parchment' ? 'dark' : 'parchment');
+    });
 
-    // Theme Toggle Button
-    const themeBtn = document.getElementById('theme-toggle-btn');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        const nextTheme = this.theme === 'parchment' ? 'dark' : 'parchment';
-        this.applyTheme(nextTheme);
-      });
-    }
+    // Font size controls
+    document.getElementById('font-decrease-btn')?.addEventListener('click', () => this.applyFontSize(this.fontSizeIdx - 1));
+    document.getElementById('font-increase-btn')?.addEventListener('click', () => this.applyFontSize(this.fontSizeIdx + 1));
 
-    // Font Size Controls (Kindle style A- / A+)
-    const fontDecrease = document.getElementById('font-decrease-btn');
-    const fontIncrease = document.getElementById('font-increase-btn');
-    if (fontDecrease) {
-      fontDecrease.addEventListener('click', () => this.applyFontSize(this.fontSizeIndex - 1));
-    }
-    if (fontIncrease) {
-      fontIncrease.addEventListener('click', () => this.applyFontSize(this.fontSizeIndex + 1));
-    }
-
-    // Sound Toggle Button
+    // Sound toggle
     const soundBtn = document.getElementById('sound-toggle-btn');
     if (soundBtn && window.pageSoundFX) {
       const updateSoundUI = () => {
@@ -330,27 +318,26 @@ class ReadingSanctuaryApp {
       if (e.key === 'Escape' && this.currentView === 'reader') {
         this.showShelf();
       } else if (this.currentView === 'reader') {
-        if (e.key === 'ArrowRight') {
-          this.nextBook();
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+          e.preventDefault();
+          this.flipNext();
         } else if (e.key === 'ArrowLeft') {
-          this.prevBook();
+          e.preventDefault();
+          this.flipPrev();
         }
       }
     });
 
-    // Jump to last bookmark button in header
-    const jumpBookmarkBtn = document.getElementById('header-bookmark-btn');
-    if (jumpBookmarkBtn) {
-      jumpBookmarkBtn.addEventListener('click', () => {
-        if (this.bookmarks.length > 0) {
-          const lastBookmarkedId = this.bookmarks[this.bookmarks.length - 1];
-          this.openBook(lastBookmarkedId);
-          this.showToast('🔖 Jumped to bookmarked title!');
-        } else {
-          this.showToast('ℹ️ No bookmarks yet. Click the ribbon in any book!');
-        }
-      });
-    }
+    // Bookmark quick jump
+    document.getElementById('header-bookmark-btn')?.addEventListener('click', () => {
+      if (this.bookmarks.length > 0) {
+        const lastId = this.bookmarks[this.bookmarks.length - 1];
+        this.openBook(lastId);
+        this.showToast('🔖 Jumped to bookmarked title!');
+      } else {
+        this.showToast('ℹ️ No bookmarks yet. Click the red ribbon in any book!');
+      }
+    });
   }
 
   showToast(msg) {
@@ -370,13 +357,12 @@ class ReadingSanctuaryApp {
   }
 
   /* ========================================================================
-     BOOKSHELF VIEW LOGIC
+     BOOKSHELF VIEW (SINGLE CLOSED 3D BOOKS)
      ======================================================================== */
   renderShelf() {
     this.currentView = 'shelf';
     window.location.hash = '';
 
-    // Update Header
     document.getElementById('reader-breadcrumb').style.display = 'none';
     document.getElementById('font-size-control').style.display = 'none';
 
@@ -385,11 +371,9 @@ class ReadingSanctuaryApp {
     shelfContainer.style.display = 'block';
     readerContainer.classList.remove('active');
 
-    // Stats calculations
     const totalQuotes = this.books.reduce((acc, b) => acc + (b.quotes ? b.quotes.length : 0), 0);
     const totalStories = this.books.reduce((acc, b) => acc + (b.stories ? b.stories.length : 0), 0);
 
-    // Extract all unique genre tags
     const allTags = new Set();
     this.books.forEach(b => b.genreTags?.forEach(t => allTags.add(t)));
     const tagsList = ['All', ...Array.from(allTags)];
@@ -398,7 +382,7 @@ class ReadingSanctuaryApp {
       <div class="shelf-hero">
         <div class="shelf-title-area">
           <div>
-            <h2 class="shelf-heading">Personal Library & Notes</h2>
+            <h2 class="shelf-heading">Personal Library & Reading Notes</h2>
             <p class="shelf-subheading">A calm, modern reading sanctuary capturing lessons, quotes, and reflections.</p>
           </div>
           <div class="shelf-quick-stats">
@@ -442,16 +426,11 @@ class ReadingSanctuaryApp {
   }
 
   attachShelfListeners() {
-    // Search input
-    const searchInput = document.getElementById('shelf-search-input');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.searchQuery = e.target.value.toLowerCase().trim();
-        this.filterBooks();
-      });
-    }
+    document.getElementById('shelf-search-input')?.addEventListener('input', (e) => {
+      this.searchQuery = e.target.value.toLowerCase().trim();
+      this.filterBooks();
+    });
 
-    // Tag filter chips
     const tagChips = document.querySelectorAll('.shelf-tag-chip');
     tagChips.forEach(chip => {
       chip.addEventListener('click', () => {
@@ -521,7 +500,7 @@ class ReadingSanctuaryApp {
             <div class="book-meta-footer">
               <span class="book-counts-pill">${quotesCount} quotes • ${storiesCount} stories</span>
               <span class="btn-open-notes">
-                ${isBookmarked ? '★ Bookmarked • ' : ''}Read Notes →
+                ${isBookmarked ? '★ Bookmarked • ' : ''}Open Book 📖 →
               </span>
             </div>
           </div>
@@ -529,12 +508,9 @@ class ReadingSanctuaryApp {
       `;
     }).join('');
 
-    // Attach click listeners to each card to open that specific book
-    const cards = grid.querySelectorAll('.closed-book-card');
-    cards.forEach(card => {
+    grid.querySelectorAll('.closed-book-card').forEach(card => {
       card.addEventListener('click', () => {
-        const bookId = card.getAttribute('data-book-id');
-        this.openBook(bookId);
+        this.openBook(card.getAttribute('data-book-id'));
       });
     });
   }
@@ -544,7 +520,7 @@ class ReadingSanctuaryApp {
   }
 
   /* ========================================================================
-     BOOK READER VIEW LOGIC (KINDLE-INSPIRED OPEN BOOK)
+     AUTHENTIC 3D PAGE-FLIP BOOK READER
      ======================================================================== */
   openBook(bookId) {
     const book = this.books.find(b => b.id === bookId);
@@ -552,25 +528,29 @@ class ReadingSanctuaryApp {
 
     this.currentView = 'reader';
     this.currentBookId = bookId;
+    this.currentSpread = 0;
     window.location.hash = bookId;
 
     if (window.pageSoundFX) {
       window.pageSoundFX.playTurnSound();
     }
 
-    // Update Header Navigation
+    // Header updates
     const breadcrumb = document.getElementById('reader-breadcrumb');
     breadcrumb.style.display = 'flex';
     document.getElementById('breadcrumb-book-title').textContent = book.title;
     document.getElementById('font-size-control').style.display = 'flex';
 
-    // Hide Shelf & Show Reader
     document.getElementById('shelf-view-container').style.display = 'none';
     const readerContainer = document.getElementById('reader-view-container');
     readerContainer.classList.add('active');
 
-    const isBookmarked = this.bookmarks.includes(book.id);
-    const bookIdx = this.books.findIndex(b => b.id === bookId);
+    // Build the spreads for this specific book
+    this.buildBookSpreads(book);
+    this.renderBookReader(book);
+  }
+
+  buildBookSpreads(book) {
     const stars = '★'.repeat(book.rating || 5);
     const tagsHtml = (book.genreTags || []).map(t => `<span class="reader-tag">#${t}</span>`).join('');
 
@@ -582,8 +562,19 @@ class ReadingSanctuaryApp {
       </div>
     `).join('');
 
-    // Quotes HTML (Kindle Highlights)
-    const quotesHtml = (book.quotes || []).map((q, i) => `
+    // First Highlight for Spread 1
+    const firstQuote = book.quotes && book.quotes[0] ? `
+      <div class="kindle-highlight-card" style="margin-top: 14px;">
+        <p class="kindle-highlight-text">“${book.quotes[0].text}”</p>
+        <div class="kindle-highlight-footer">
+          <span class="kindle-loc">Key Highlight • ${book.quotes[0].loc || `p. ${book.quotes[0].page}`}</span>
+          ${book.quotes[0].note ? `<span class="kindle-note">${book.quotes[0].note}</span>` : ''}
+        </div>
+      </div>
+    ` : '';
+
+    // Highlights for Spread 2
+    const remainingQuotesHtml = (book.quotes || []).slice(1).map(q => `
       <div class="kindle-highlight-card">
         <p class="kindle-highlight-text">“${q.text}”</p>
         <div class="kindle-highlight-footer">
@@ -603,203 +594,418 @@ class ReadingSanctuaryApp {
 
     const marg = book.marginalia;
 
+    // SPREAD 1: Overview & What I Liked (Left) + Core Concepts (Right)
+    const spread1Left = `
+      <div class="page-inner-content">
+        <div class="page-folio-header">
+          <span>${book.author.toUpperCase()}</span>
+          <span>${book.dateRead || book.year}</span>
+        </div>
+
+        <div class="reader-book-identity">
+          <div class="reader-mini-cover" style="--accent-color: ${book.accentColor || '#2c3e50'};">
+            <span>${book.coverSymbol || '📖'}</span>
+          </div>
+          <div class="reader-identity-meta">
+            <div class="reader-tags-row">${tagsHtml}</div>
+            <h2 class="reader-book-title">${book.title}</h2>
+            <div class="reader-author-line">
+              <span>by ${book.author}</span>
+              <span class="reader-stars">${stars}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="reader-oneliner-box">
+          <p class="reader-oneliner-text">“${book.oneLiner}”</p>
+        </div>
+
+        <div class="reader-section">
+          <div class="reader-section-header">
+            <span class="reader-section-icon">❦</span>
+            <h4 class="reader-section-title">The Core Spark (What I Liked)</h4>
+          </div>
+          <div class="reader-reflection-body">
+            <p>${book.whatILiked}</p>
+          </div>
+        </div>
+
+        <div class="page-folio-footer">
+          <span>Spread 1 of 2</span>
+          <span>p. 1</span>
+        </div>
+      </div>
+    `;
+
+    const spread1Right = `
+      <div class="page-inner-content">
+        <div class="page-folio-header">
+          <span>${book.title.toUpperCase()}</span>
+          <span>CONCEPTS & MODELS</span>
+        </div>
+
+        <div class="reader-section">
+          <div class="reader-section-header">
+            <span class="reader-section-icon">◈</span>
+            <h4 class="reader-section-title">Core Mental Frameworks</h4>
+          </div>
+          <div class="reader-topics-list">
+            ${topicsHtml}
+          </div>
+        </div>
+
+        ${firstQuote}
+
+        <div class="page-folio-footer">
+          <span class="page-turn-hint-link" id="hint-flip-next">Flip page for Quotes & Stories →</span>
+          <span>p. 2</span>
+        </div>
+      </div>
+    `;
+
+    // SPREAD 2: Highlights/Quotes (Left) + Stories & Marginalia (Right)
+    const spread2Left = `
+      <div class="page-inner-content">
+        <div class="page-folio-header">
+          <span>${book.title.toUpperCase()}</span>
+          <span>STANDOUT HIGHLIGHTS</span>
+        </div>
+
+        <div class="reader-section">
+          <div class="reader-section-header">
+            <span class="reader-section-icon">❝</span>
+            <h4 class="reader-section-title">Kindle Highlights & Passages</h4>
+          </div>
+          <div class="kindle-highlights-list">
+            ${remainingQuotesHtml || firstQuote}
+          </div>
+        </div>
+
+        <div class="page-folio-footer">
+          <span class="page-turn-hint-link" id="hint-flip-prev">← Flip back to Concepts</span>
+          <span>p. 3</span>
+        </div>
+      </div>
+    `;
+
+    const spread2Right = `
+      <div class="page-inner-content">
+        <div class="page-folio-header">
+          <span>${book.title.toUpperCase()}</span>
+          <span>STORIES & MARGINALIA</span>
+        </div>
+
+        ${storiesHtml ? `
+        <div class="reader-section">
+          <div class="reader-section-header">
+            <span class="reader-section-icon">🕮</span>
+            <h4 class="reader-section-title">Stories & Parables</h4>
+          </div>
+          ${storiesHtml}
+        </div>
+        ` : ''}
+
+        ${marg ? `
+        <div class="modern-marginalia-card">
+          <div class="marginalia-pin-badge">${marg.sticker || '📌'}</div>
+          <p class="marginalia-handwritten-note">${marg.note}</p>
+          <div class="marginalia-footer">
+            <span>${marg.date || ''} • Personal Marginalia</span>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="page-folio-footer">
+          <span>End of Notes</span>
+          <span>p. 4</span>
+        </div>
+      </div>
+    `;
+
+    this.bookSpreads = [
+      { spreadIdx: 0, leftHtml: spread1Left, rightHtml: spread1Right, label: 'Overview & Frameworks' },
+      { spreadIdx: 1, leftHtml: spread2Left, rightHtml: spread2Right, label: 'Quotes, Stories & Marginalia' }
+    ];
+  }
+
+  renderBookReader(book) {
+    const readerContainer = document.getElementById('reader-view-container');
+    const isBookmarked = this.bookmarks.includes(book.id);
+    const bookIdx = this.books.findIndex(b => b.id === book.id);
+    const currentSpreadData = this.bookSpreads[this.currentSpread];
+
     readerContainer.innerHTML = `
       <!-- Top Reader Sub-bar -->
       <div class="reader-subbar">
-        <div class="reader-subbar-left">
-          <button class="subbar-btn" id="reader-back-shelf-btn">
-            <span>← Bookshelf</span>
-          </button>
-        </div>
-        <div class="reader-subbar-right">
-          <button class="bookmark-toggle-btn ${isBookmarked ? 'bookmarked' : ''}" id="reader-bookmark-toggle">
+        <button class="subbar-btn" id="reader-back-shelf-btn">
+          <span>← Back to Bookshelf</span>
+        </button>
+        <div class="subbar-right-tools">
+          <span class="spread-tag-badge" id="current-spread-badge">${currentSpreadData.label}</span>
+          <button class="subbar-btn ${isBookmarked ? 'bookmarked' : ''}" id="reader-bookmark-toggle">
             <span>${isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}</span>
           </button>
         </div>
       </div>
 
-      <!-- The Open Book Layout -->
-      <div class="open-book-shell">
-        <!-- Left Leaf: Overview, What I Liked & Themes -->
-        <div class="book-leaf leaf-left">
-          <div class="leaf-folio-header">
-            <span>${book.author.toUpperCase()}</span>
-            <span>${book.dateRead || book.year}</span>
+      <!-- 3D Book Stage with Authentic Page Flip -->
+      <div class="book-stage" id="book-stage">
+        <div class="book-casing" id="book-casing">
+          <!-- Center Spine Crease -->
+          <div class="book-spine-gutter"></div>
+
+          <!-- Hanging Silk Ribbon Bookmark -->
+          <div class="ribbon-bookmark-drape ${isBookmarked ? 'active' : ''}" id="ribbon-drape" title="Click to bookmark this book">
+            <div class="ribbon-tail-notch"></div>
           </div>
 
-          <div class="reader-book-identity">
-            <div class="reader-mini-cover" style="--accent-color: ${book.accentColor || '#2c3e50'};">
-              <span>${book.coverSymbol || '📖'}</span>
-            </div>
-            <div class="reader-identity-meta">
-              <div class="reader-tags-row">${tagsHtml}</div>
-              <h2 class="reader-book-title">${book.title}</h2>
-              <div class="reader-author-line">
-                <span>by ${book.author} (${book.year})</span>
-                <span class="reader-stars">${stars}</span>
-              </div>
-            </div>
+          <!-- Left Page Panel -->
+          <div class="book-panel panel-left" id="panel-left">
+            ${currentSpreadData.leftHtml}
+            <div class="page-turn-trigger trigger-prev" id="edge-trigger-prev" title="Flip page backward (← Arrow)"></div>
           </div>
 
-          <div class="reader-oneliner-box">
-            <p class="reader-oneliner-text">“${book.oneLiner}”</p>
-          </div>
-
-          <div class="reader-section">
-            <div class="reader-section-header">
-              <span class="reader-section-icon">❦</span>
-              <h4 class="reader-section-title">The Core Spark (What I Liked)</h4>
+          <!-- Right Page Panel -->
+          <div class="book-panel panel-right" id="panel-right">
+            ${currentSpreadData.rightHtml}
+            <div class="page-turn-trigger trigger-next" id="edge-trigger-next" title="Flip page forward (→ Arrow or Click Corner)">
+              <div class="corner-peel-hint" title="Turn page"></div>
             </div>
-            <div class="reader-reflection-body">
-              <p>${book.whatILiked}</p>
-            </div>
-          </div>
-
-          ${topicsHtml ? `
-          <div class="reader-section">
-            <div class="reader-section-header">
-              <span class="reader-section-icon">◈</span>
-              <h4 class="reader-section-title">Core Concepts & Models</h4>
-            </div>
-            <div class="reader-topics-list">
-              ${topicsHtml}
-            </div>
-          </div>
-          ` : ''}
-
-          <div class="leaf-folio-footer">
-            <span>Volume ${bookIdx + 1} of ${this.books.length}</span>
-            <span>p. 1</span>
-          </div>
-        </div>
-
-        <!-- Right Leaf: Kindle Highlights, Stories & Handwritten Marginalia -->
-        <div class="book-leaf leaf-right">
-          <div class="leaf-folio-header">
-            <span>${book.title.toUpperCase()}</span>
-            <span>HIGHLIGHTS & MARGINALIA</span>
-          </div>
-
-          ${quotesHtml ? `
-          <div class="reader-section">
-            <div class="reader-section-header">
-              <span class="reader-section-icon">❝</span>
-              <h4 class="reader-section-title">Standout Highlights (${book.quotes.length})</h4>
-            </div>
-            <div class="kindle-highlights-list">
-              ${quotesHtml}
-            </div>
-          </div>
-          ` : ''}
-
-          ${storiesHtml ? `
-          <div class="reader-section">
-            <div class="reader-section-header">
-              <span class="reader-section-icon">🕮</span>
-              <h4 class="reader-section-title">Stories & Parables</h4>
-            </div>
-            ${storiesHtml}
-          </div>
-          ` : ''}
-
-          ${marg ? `
-          <div class="modern-marginalia-card">
-            <div class="marginalia-pin-badge">${marg.sticker || '📌'}</div>
-            <p class="marginalia-handwritten-note">${marg.note}</p>
-            <div class="marginalia-footer">
-              <span>${marg.date || ''} • Personal Marginalia</span>
-            </div>
-          </div>
-          ` : ''}
-
-          <div class="leaf-folio-footer">
-            <span>Kindle Notes Edition</span>
-            <span>p. 2</span>
           </div>
         </div>
       </div>
 
-      <!-- Bottom Progress Bar & Fast Navigation -->
-      <div class="reader-progress-bar-wrap">
-        <div class="progress-left-info">
-          <span>Book ${bookIdx + 1} of ${this.books.length}</span>
-          <div class="progress-line-track">
-            <div class="progress-line-fill" style="width: ${((bookIdx + 1) / this.books.length) * 100}%"></div>
+      <!-- Bottom Page Flip Dock -->
+      <nav class="reader-page-dock" aria-label="Page Controls">
+        <div class="dock-page-controls">
+          <button class="dock-flip-btn" id="btn-flip-prev" ${this.currentSpread === 0 ? 'disabled' : ''}>
+            <span>← Flip Back</span>
+          </button>
+
+          <div class="spread-dots-indicator">
+            ${this.bookSpreads.map((_, i) => `
+              <div class="spread-dot ${i === this.currentSpread ? 'active' : ''}"></div>
+            `).join('')}
           </div>
-          <span>${Math.round(((bookIdx + 1) / this.books.length) * 100)}% of Library</span>
+
+          <button class="dock-flip-btn" id="btn-flip-next" ${this.currentSpread === this.bookSpreads.length - 1 ? 'disabled' : ''}>
+            <span>Flip Page →</span>
+          </button>
+
+          <span class="dock-spread-label" id="dock-spread-label">Spread ${this.currentSpread + 1} of ${this.bookSpreads.length}</span>
         </div>
 
-        <div class="progress-nav-buttons">
-          <button class="progress-jump-btn" id="prev-book-btn" ${bookIdx === 0 ? 'disabled' : ''}>
-            ← Previous Book
+        <div class="dock-book-jumper">
+          <button class="dock-jump-btn" id="dock-prev-book" ${bookIdx === 0 ? 'disabled' : ''}>
+            ← Prev Book
           </button>
-          <button class="progress-jump-btn" id="next-book-btn" ${bookIdx === this.books.length - 1 ? 'disabled' : ''}>
+          <span style="font-size: 0.76rem; color: var(--text-tertiary);">Volume ${bookIdx + 1} of ${this.books.length}</span>
+          <button class="dock-jump-btn" id="dock-next-book" ${bookIdx === this.books.length - 1 ? 'disabled' : ''}>
             Next Book →
           </button>
         </div>
-      </div>
+      </nav>
     `;
 
-    this.attachReaderListeners(bookId, bookIdx);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.attachPageFlipEvents(book, bookIdx);
   }
 
-  attachReaderListeners(bookId, bookIdx) {
-    // Back to shelf button
-    const backBtn = document.getElementById('reader-back-shelf-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', () => this.showShelf());
-    }
+  attachPageFlipEvents(book, bookIdx) {
+    // Back to shelf
+    document.getElementById('reader-back-shelf-btn')?.addEventListener('click', () => this.showShelf());
 
-    // Bookmark Toggle button
-    const bookmarkBtn = document.getElementById('reader-bookmark-toggle');
-    if (bookmarkBtn) {
-      bookmarkBtn.addEventListener('click', () => {
-        if (this.bookmarks.includes(bookId)) {
-          this.bookmarks = this.bookmarks.filter(id => id !== bookId);
-          bookmarkBtn.classList.remove('bookmarked');
-          bookmarkBtn.innerHTML = '<span>☆ Bookmark</span>';
-          this.showToast('Bookmark removed');
-        } else {
-          this.bookmarks.push(bookId);
-          bookmarkBtn.classList.add('bookmarked');
-          bookmarkBtn.innerHTML = '<span>★ Bookmarked</span>';
-          this.showToast('🔖 Bookmarked this title!');
-        }
-        localStorage.setItem('reading_sanctuary_bookmarks', JSON.stringify(this.bookmarks));
-      });
-    }
+    // Ribbon bookmark toggle
+    const handleBookmark = () => {
+      const idx = this.bookmarks.indexOf(book.id);
+      const ribbon = document.getElementById('ribbon-drape');
+      const btn = document.getElementById('reader-bookmark-toggle');
 
-    // Prev / Next Book buttons
-    const prevBtn = document.getElementById('prev-book-btn');
-    const nextBtn = document.getElementById('next-book-btn');
-    if (prevBtn) {
-      prevBtn.addEventListener('click', () => this.prevBook());
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener('click', () => this.nextBook());
-    }
+      if (idx !== -1) {
+        this.bookmarks.splice(idx, 1);
+        ribbon?.classList.remove('active');
+        if (btn) btn.innerHTML = '<span>☆ Bookmark</span>';
+        this.showToast('Bookmark removed');
+      } else {
+        this.bookmarks.push(book.id);
+        ribbon?.classList.add('active');
+        if (btn) btn.innerHTML = '<span>★ Bookmarked</span>';
+        this.showToast('🔖 Ribbon Bookmark placed on this volume!');
+      }
+      localStorage.setItem('sanctuary_bookmarks', JSON.stringify(this.bookmarks));
+    };
+
+    document.getElementById('reader-bookmark-toggle')?.addEventListener('click', handleBookmark);
+    document.getElementById('ribbon-drape')?.addEventListener('click', handleBookmark);
+
+    // Page turn triggers (Edge click + Curled Corner click)
+    document.getElementById('edge-trigger-next')?.addEventListener('click', () => this.flipNext());
+    document.getElementById('edge-trigger-prev')?.addEventListener('click', () => this.flipPrev());
+    document.getElementById('hint-flip-next')?.addEventListener('click', () => this.flipNext());
+    document.getElementById('hint-flip-prev')?.addEventListener('click', () => this.flipPrev());
+
+    // Dock buttons
+    document.getElementById('btn-flip-next')?.addEventListener('click', () => this.flipNext());
+    document.getElementById('btn-flip-prev')?.addEventListener('click', () => this.flipPrev());
+
+    // Book jumps
+    document.getElementById('dock-prev-book')?.addEventListener('click', () => {
+      if (bookIdx > 0) this.openBook(this.books[bookIdx - 1].id);
+    });
+    document.getElementById('dock-next-book')?.addEventListener('click', () => {
+      if (bookIdx < this.books.length - 1) this.openBook(this.books[bookIdx + 1].id);
+    });
   }
 
-  nextBook() {
-    if (!this.currentBookId) return;
-    const idx = this.books.findIndex(b => b.id === this.currentBookId);
-    if (idx < this.books.length - 1) {
-      this.openBook(this.books[idx + 1].id);
+  /* ========================================================================
+     AUTHENTIC 3D PAGE-FLIP ENGINE (ANIMATING THE PAGE PEEL)
+     ======================================================================== */
+  flipNext() {
+    if (this.isPageTurning) return;
+    if (this.currentSpread >= this.bookSpreads.length - 1) {
+      // If at last spread, jump to next book if available
+      const idx = this.books.findIndex(b => b.id === this.currentBookId);
+      if (idx < this.books.length - 1) {
+        this.openBook(this.books[idx + 1].id);
+      }
+      return;
     }
+
+    this.isPageTurning = true;
+    if (window.pageSoundFX) {
+      window.pageSoundFX.playTurnSound();
+    }
+
+    const bookCasing = document.getElementById('book-casing');
+    const currentSpreadData = this.bookSpreads[this.currentSpread];
+    const nextSpreadData = this.bookSpreads[this.currentSpread + 1];
+
+    // Create 3D Turning Leaf that rotates from Right to Left
+    const turningLeaf = document.createElement('div');
+    turningLeaf.className = 'turning-leaf leaf-turn-forward';
+    turningLeaf.innerHTML = `
+      <div class="leaf-face leaf-face-front">${currentSpreadData.rightHtml}</div>
+      <div class="leaf-face leaf-face-back">${nextSpreadData.leftHtml}</div>
+      <div class="leaf-shadow-layer"></div>
+    `;
+
+    bookCasing.appendChild(turningLeaf);
+
+    // Swap underlying right panel immediately to target spread's right content
+    const panelRight = document.getElementById('panel-right');
+    if (panelRight) {
+      panelRight.innerHTML = `
+        ${nextSpreadData.rightHtml}
+        <div class="page-turn-trigger trigger-next" id="edge-trigger-next" title="Flip page forward">
+          <div class="corner-peel-hint" title="Turn page"></div>
+        </div>
+      `;
+    }
+
+    setTimeout(() => {
+      this.currentSpread += 1;
+      const panelLeft = document.getElementById('panel-left');
+      if (panelLeft) {
+        panelLeft.innerHTML = `
+          ${nextSpreadData.leftHtml}
+          <div class="page-turn-trigger trigger-prev" id="edge-trigger-prev" title="Flip page backward"></div>
+        `;
+      }
+      turningLeaf.remove();
+      this.isPageTurning = false;
+      this.updateDockState();
+      this.rebindPageTriggers();
+    }, 600);
   }
 
-  prevBook() {
-    if (!this.currentBookId) return;
-    const idx = this.books.findIndex(b => b.id === this.currentBookId);
-    if (idx > 0) {
-      this.openBook(this.books[idx - 1].id);
+  flipPrev() {
+    if (this.isPageTurning) return;
+    if (this.currentSpread <= 0) {
+      // If at first spread, jump to prev book if available
+      const idx = this.books.findIndex(b => b.id === this.currentBookId);
+      if (idx > 0) {
+        this.openBook(this.books[idx - 1].id);
+      }
+      return;
     }
+
+    this.isPageTurning = true;
+    if (window.pageSoundFX) {
+      window.pageSoundFX.playTurnSound();
+    }
+
+    const bookCasing = document.getElementById('book-casing');
+    const currentSpreadData = this.bookSpreads[this.currentSpread];
+    const prevSpreadData = this.bookSpreads[this.currentSpread - 1];
+
+    // Create 3D Turning Leaf that rotates from Left to Right
+    const turningLeaf = document.createElement('div');
+    turningLeaf.className = 'turning-leaf leaf-turn-backward';
+    turningLeaf.innerHTML = `
+      <div class="leaf-face leaf-face-front">${currentSpreadData.leftHtml}</div>
+      <div class="leaf-face leaf-face-back">${prevSpreadData.rightHtml}</div>
+      <div class="leaf-shadow-layer"></div>
+    `;
+
+    bookCasing.appendChild(turningLeaf);
+
+    // Swap underlying left panel immediately to target spread's left content
+    const panelLeft = document.getElementById('panel-left');
+    if (panelLeft) {
+      panelLeft.innerHTML = `
+        ${prevSpreadData.leftHtml}
+        <div class="page-turn-trigger trigger-prev" id="edge-trigger-prev" title="Flip page backward"></div>
+      `;
+    }
+
+    setTimeout(() => {
+      this.currentSpread -= 1;
+      const panelRight = document.getElementById('panel-right');
+      if (panelRight) {
+        panelRight.innerHTML = `
+          ${prevSpreadData.rightHtml}
+          <div class="page-turn-trigger trigger-next" id="edge-trigger-next" title="Flip page forward">
+            <div class="corner-peel-hint" title="Turn page"></div>
+          </div>
+        `;
+      }
+      turningLeaf.remove();
+      this.isPageTurning = false;
+      this.updateDockState();
+      this.rebindPageTriggers();
+    }, 600);
+  }
+
+  updateDockState() {
+    const currentSpreadData = this.bookSpreads[this.currentSpread];
+    const badge = document.getElementById('current-spread-badge');
+    if (badge) badge.textContent = currentSpreadData.label;
+
+    const label = document.getElementById('dock-spread-label');
+    if (label) label.textContent = `Spread ${this.currentSpread + 1} of ${this.bookSpreads.length}`;
+
+    const prevBtn = document.getElementById('btn-flip-prev');
+    const nextBtn = document.getElementById('btn-flip-next');
+    if (prevBtn) prevBtn.disabled = this.currentSpread === 0;
+    if (nextBtn) nextBtn.disabled = this.currentSpread === this.bookSpreads.length - 1;
+
+    // Dots
+    const dots = document.querySelectorAll('.spread-dot');
+    dots.forEach((dot, i) => {
+      if (i === this.currentSpread) dot.classList.add('active');
+      else dot.classList.remove('active');
+    });
+  }
+
+  rebindPageTriggers() {
+    document.getElementById('edge-trigger-next')?.addEventListener('click', () => this.flipNext());
+    document.getElementById('edge-trigger-prev')?.addEventListener('click', () => this.flipPrev());
+    document.getElementById('hint-flip-next')?.addEventListener('click', () => this.flipNext());
+    document.getElementById('hint-flip-prev')?.addEventListener('click', () => this.flipPrev());
   }
 }
 
-// Bootstrap on DOM ready
+// Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
-  window.sanctuaryApp = new ReadingSanctuaryApp();
+  window.sanctuaryApp = new SanctuaryApp();
   window.sanctuaryApp.init();
 });
