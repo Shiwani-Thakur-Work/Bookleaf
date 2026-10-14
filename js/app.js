@@ -14,6 +14,7 @@ const DEFAULT_BOOKS = [
     "dateRead": "September 2026",
     "accentColor": "#A44C28",
     "coverSymbol": "⚡",
+    "coverImage": "./assets/covers/atomic-habits.jpg",
     "oneLiner": "You do not rise to the level of your goals. You fall to the level of your systems.",
     "whatILiked": "The most empowering book on human behavior I have encountered. Clear dismantles the myth that massive success requires monumental willpower. Instead, he treats identity as a daily vote: every small choice casts a ballot for who you want to become. This completely shifted how I structure my mornings and reading routines.",
     "quotes": [
@@ -68,6 +69,7 @@ const DEFAULT_BOOKS = [
     "dateRead": "August 2026",
     "accentColor": "#29455E",
     "coverSymbol": "🏛️",
+    "coverImage": "./assets/covers/meditations.jpg",
     "oneLiner": "You have power over your mind — not outside events. Realize this, and you will find strength.",
     "whatILiked": "Reading this feels like eavesdropping on the private soul of the most powerful man in the ancient world. Marcus never intended these pages to be published; they were private self-admonitions written in military campaign tents. His humility, ruthless self-honesty, and acceptance of mortality are profoundly grounding.",
     "quotes": [
@@ -122,6 +124,7 @@ const DEFAULT_BOOKS = [
     "dateRead": "July 2026",
     "accentColor": "#1D4E3E",
     "coverSymbol": "⏳",
+    "coverImage": "./assets/covers/psychology-of-money.jpg",
     "oneLiner": "Doing well with money has a little to do with how smart you are and a lot to do with how you behave.",
     "whatILiked": "Not a single boring spreadsheet or dry formula in sight. Housel treats money as a study of human psychology: ego, envy, fear, and freedom. The chapter on 'Freedom' resonated deeply — that wealth's greatest dividend is not shiny toys, but the ability to wake up every morning and control your own schedule.",
     "quotes": [
@@ -176,6 +179,7 @@ const DEFAULT_BOOKS = [
     "dateRead": "May 2026",
     "accentColor": "#8A5A2B",
     "coverSymbol": "☀️",
+    "coverImage": "./assets/covers/klara-and-the-sun.jpg",
     "oneLiner": "Do you believe in the human heart? Something that makes each of us truly special and individual?",
     "whatILiked": "Ishiguro's gentle, heartbreaking restraint. Klara, a solar-powered Artificial Friend, observes human fragility, jealousy, and unconditional love with a purity that human characters have lost. It poses lingering philosophical questions about whether human beings are truly irreplaceable.",
     "quotes": [
@@ -481,21 +485,31 @@ class SanctuaryApp {
       return `
         <div class="closed-book-card" data-book-id="${book.id}">
           <div class="book-cover-mockup" style="--accent-color: ${book.accentColor || '#2c3e50'};">
-            <div class="cover-top-row">
-              <span class="cover-symbol-badge">${book.coverSymbol || '📖'}</span>
-              <span class="cover-genre-tag">${(book.genreTags && book.genreTags[0]) || 'Book'}</span>
-            </div>
-            <div class="cover-center-content">
-              <h3 class="cover-book-title">${book.title}</h3>
-              <p class="cover-book-author">by ${book.author}</p>
-            </div>
-            <div class="cover-bottom-row">
-              <span class="cover-reading-date">${book.dateRead || book.year}</span>
-              <span class="cover-stars">${stars}</span>
-            </div>
+            ${book.coverImage 
+              ? `<img src="${book.coverImage}" alt="${book.title} cover" class="cover-real-img" loading="lazy" />` 
+              : `
+                <div class="cover-top-row">
+                  <span class="cover-symbol-badge">${book.coverSymbol || '📖'}</span>
+                  <span class="cover-genre-tag">${(book.genreTags && book.genreTags[0]) || 'Book'}</span>
+                </div>
+                <div class="cover-center-content">
+                  <h3 class="cover-book-title">${book.title}</h3>
+                  <p class="cover-book-author">by ${book.author}</p>
+                </div>
+                <div class="cover-bottom-row">
+                  <span class="cover-reading-date">${book.dateRead || book.year}</span>
+                  <span class="cover-stars">${stars}</span>
+                </div>
+              `
+            }
           </div>
 
           <div class="book-card-details">
+            <div class="card-title-row">
+              <h3 class="card-book-title">${book.title}</h3>
+              <span class="card-stars">${stars}</span>
+            </div>
+            <p class="card-author-line">by ${book.author} (${book.year})</p>
             <p class="book-card-quote">“${book.oneLiner}”</p>
             <div class="book-meta-footer">
               <span class="book-counts-pill">${quotesCount} quotes • ${storiesCount} stories</span>
@@ -604,7 +618,9 @@ class SanctuaryApp {
 
         <div class="reader-book-identity">
           <div class="reader-mini-cover" style="--accent-color: ${book.accentColor || '#2c3e50'};">
-            <span>${book.coverSymbol || '📖'}</span>
+            ${book.coverImage 
+              ? `<img src="${book.coverImage}" alt="${book.title} cover" />` 
+              : `<span>${book.coverSymbol || '📖'}</span>`}
           </div>
           <div class="reader-identity-meta">
             <div class="reader-tags-row">${tagsHtml}</div>
