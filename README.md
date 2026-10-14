@@ -1,6 +1,6 @@
-# 📖 The Reading Sanctuary — Personal Library & Notes
+# 🍃 Bookleaf — Personal Reading Notes
 
-> A modern, Kindle-inspired digital reading sanctuary. View your personal collection of books as sleek, closed 3D volumes on a library shelf; click any book to smoothly open it and explore reflections, Kindle-style highlights, memorable stories, and handwritten marginalia.
+> A modern, Kindle-inspired digital reading journal. View your personal collection of books as sleek, closed 3D volumes on a library shelf; click any book to smoothly open it and explore reflections, Kindle-style highlights, memorable stories, and handwritten marginalia.
 
 Designed to be **100% natively deployable on GitHub Pages** with **zero build tools, zero dependencies, and zero 3rd-party apps**.
 

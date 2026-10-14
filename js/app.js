@@ -1,5 +1,5 @@
 /**
- * The Reading Sanctuary — Main Controller
+ * Bookleaf — Main Controller
  * Modern 3D Standalone Bookshelf + Authentic 3D Page Flip Book Reader
  */
 
@@ -387,7 +387,7 @@ class SanctuaryApp {
         <div class="shelf-title-area">
           <div>
             <h2 class="shelf-heading">Personal Library & Reading Notes</h2>
-            <p class="shelf-subheading">A calm, modern reading sanctuary capturing lessons, quotes, and reflections.</p>
+            <p class="shelf-subheading">A quiet, personal reading journal capturing lessons, highlights, and marginalia.</p>
           </div>
           <div class="shelf-quick-stats">
             <div class="quick-stat-badge">
